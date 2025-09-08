@@ -43,7 +43,7 @@ def main():
     enCours  = True
 
     #Initialiser le paddle et ses caractéristiques
-    paddle = Paddle(BLEU, 100, 20)
+    paddle = Paddle(BLANC, 100, 20)
     paddle.rect.x = 350
     paddle.rect.y = 560
 
@@ -206,7 +206,7 @@ def main():
 
         #Code d'affichage des éléments
         #Mettre une couleur à l'écran
-        ecran.fill(BLEUFONCE)
+        ecran.fill(NOIR)
         pygame.draw.line(ecran, BLANC, [0, 40], [800, 40], 2)
 
         #Afficher le score et les vies en haut de l'écran
