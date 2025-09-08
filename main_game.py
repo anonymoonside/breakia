@@ -2,6 +2,7 @@ import pygame   #Importe la bibliothèque pygame pour créer le jeu et l'initial
 from paddle import Paddle   #Importe la class Paddle dans paddle.py
 from balle import Balle   #Importe la class Balle dans balle.py
 from mur import Mur   #Importe la class Mur dans mur.py
+from simple_ai import SimpleAI  #Importe la class SimpleAI dans simple_ai.py
 
 #Définir les couleurs à utiliser
 BLANC = (255,255,255)
@@ -33,6 +34,7 @@ def main():
     balle = Balle(BLANC, 15, 15)
     balle.rect.x = 345
     balle.rect.y = 300
+
     #Créer une liste qui contiendra tout les sprites du jeu
     sprites_liste = pygame.sprite.Group()
 
@@ -67,7 +69,8 @@ def main():
         sprites_liste.add(brique)
         mur_briques.add(brique)
 
-
+    #Déclarer ia
+    ia = SimpleAI()
 
     #Réglages de la fenêtre
     tailleEcran = (800, 600)
@@ -109,7 +112,7 @@ def main():
 
         if balle.rect.x >= 790:
             balle.velocity[0] = -balle.velocity[0]
-        if balle.rect.x <= 0:
+        if balle.rect.x <= 10:
             balle.velocity[0] = -balle.velocity[0]
         if balle.rect.y <= 40:
             balle.velocity[1] = -balle.velocity[1]
@@ -154,15 +157,33 @@ def main():
                 main()
                 return
 
-        #Eviter que la balle reste coincée à l'horizontale
+        #Eviter que la balle reste coincée à l'horizontale et à la verticale
         if balle.velocity[1] == 0:
-            balle.velocity[1] += 5
+            balle.velocity[1] += 2
             print("La balle est restée bloquée à l'horizontale")
+        if balle.velocity[0] == 0:
+            balle.velocity[0] += 2
+            print("La balle est restée bloquée à la verticale")
 
-        if balle.rect.centerx > paddle.rect.centerx:
-            paddle.bougerDroite(7)
-        if balle.rect.centerx < paddle.rect.centerx:
-            paddle.bougerGauche(7)
+        #Initialisation de l'IA simple et calcul de trajectoire
+        #Si la balle _____________
+        ancienneVX = balle.velocity[0]; ancienneVY = balle.velocity[1]
+        if balle.velocity[1] > 0 and not ia.aDejaPrevu:
+            ia.xPredit = ia.projection(balle.rect.x, balle.rect.y, balle.velocity[0], balle.velocity[1], 560)
+            ia.aDejaPrevu = True
+
+        if ia.aDejaPrevu:
+            if balle.velocity[1] > 0:
+                if ia.xPredit > paddle.rect.centerx:
+                    paddle.bougerDroite(8)
+                if ia.xPredit < paddle.rect.centerx:
+                    paddle.bougerGauche(8)
+                if balle.velocity[0] == ancienneVX:
+                    ia.xPredit = ia.projection(balle.rect.x, balle.rect.y, balle.velocity[0], balle.velocity[1], 560) 
+
+
+        if balle.velocity[1] < 0:
+            ia.aDejaPrevu = False
 
         #Code d'affichage des éléments
         #Mettre une couleur à l'écran
@@ -192,5 +213,23 @@ if __name__ == "__main__":
     main()
 
 
+#Étapes à coder (sans code brut)
 
+#Crée une fonction predire_arrivee(balle) :
+
+#Copie x, y, vx, vy de la balle.
+
+#Boucle jusqu’à atteindre y = paddle.rect.y.
+
+#Applique la physique (déplacement + rebond sur les murs gauche/droite).
+
+#Retourne la coordonnée x_predite.
+
+#Dans ton IA :
+
+#Si la balle descend (vy > 0), calcule x_predite.
+
+#Si paddle.centerx < x_predite → bouge à droite.
+
+#Si paddle.centerx > x_predite → bouge à gauche.
 
