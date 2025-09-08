@@ -1,4 +1,5 @@
 import pygame   #Importe la bibliothèque pygame pour créer le jeu et l'initialiser
+import numpy as np  #Importe numpy en tant que np
 from paddle import Paddle   #Importe la class Paddle dans paddle.py
 from balle import Balle   #Importe la class Balle dans balle.py
 from mur import Mur   #Importe la class Mur dans mur.py
@@ -19,6 +20,22 @@ JAUNE = (245, 210, 10)
 def main():
     
     pygame.init()   #Initialise le jeu pygame
+
+
+    #Variables pour le Q-Learning
+    state_n = 0; action_n = 0
+    Q = np.zeros([state_n, action_n])
+
+    # Set learning parameters
+    lr = .85
+    y = .99
+    num_episodes = 1000
+    cumul_reward_list = []
+    actions_list = []
+    states_list = []
+
+
+
 
     #Variables de vies, score et enCours pour la boucle princiaple
     vies = 3
@@ -166,22 +183,24 @@ def main():
             print("La balle est restée bloquée à la verticale")
 
         #Initialisation de l'IA simple et calcul de trajectoire
-        #Si la balle _____________
-        ancienneVX = balle.velocity[0]; ancienneVY = balle.velocity[1]
+        #Si la balle descend on calcule sa trajectoire en appellant ma fonction projection
+        ancienneVX = balle.velocity[0]
         if balle.velocity[1] > 0 and not ia.aDejaPrevu:
             ia.xPredit = ia.projection(balle.rect.x, balle.rect.y, balle.velocity[0], balle.velocity[1], 560)
-            ia.aDejaPrevu = True
+            ia.aDejaPrevu = True    #DejaPrevu en True permet de ne pas recalculer chaque frame la trajectoire
 
+        #Bouger selon la coordonnée de fin de trajectoire de la balle
         if ia.aDejaPrevu:
             if balle.velocity[1] > 0:
                 if ia.xPredit > paddle.rect.centerx:
                     paddle.bougerDroite(8)
                 if ia.xPredit < paddle.rect.centerx:
                     paddle.bougerGauche(8)
-                if balle.velocity[0] == ancienneVX:
+                #Truc bizarre que j'ai trouver pour calculer une nouvelle trajectoire quand la balle en change (ie. contre une brique)
+                if balle.velocity[0] == ancienneVX: 
                     ia.xPredit = ia.projection(balle.rect.x, balle.rect.y, balle.velocity[0], balle.velocity[1], 560) 
 
-
+        #Si la balle monte on desactive dejaprevu et on attend pour recalculer à la prochaine descente
         if balle.velocity[1] < 0:
             ia.aDejaPrevu = False
 
@@ -211,25 +230,3 @@ def main():
 #Lancer le jeu seulement si le fichier est exécuté directement
 if __name__ == "__main__":
     main()
-
-
-#Étapes à coder (sans code brut)
-
-#Crée une fonction predire_arrivee(balle) :
-
-#Copie x, y, vx, vy de la balle.
-
-#Boucle jusqu’à atteindre y = paddle.rect.y.
-
-#Applique la physique (déplacement + rebond sur les murs gauche/droite).
-
-#Retourne la coordonnée x_predite.
-
-#Dans ton IA :
-
-#Si la balle descend (vy > 0), calcule x_predite.
-
-#Si paddle.centerx < x_predite → bouge à droite.
-
-#Si paddle.centerx > x_predite → bouge à gauche.
-
