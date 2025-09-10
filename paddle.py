@@ -1,5 +1,4 @@
 import pygame
-NOIR = (0, 0, 0)
 
 class Paddle(pygame.sprite.Sprite):
     #Créer une class pour le paddle avec la fonction sprite de pygame

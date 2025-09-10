@@ -226,7 +226,7 @@ def run_game(total_games):
             score += 1  #Augmenter le score quand une brique est touchée
             brique.kill()
 
-
+        #Evite que la balle reste coincée
         if balle.velocity[1] == 0:
             balle.velocity[1] = random.choice([-1, 1])
         if balle.velocity[0] == 0:
@@ -281,10 +281,10 @@ def run_game(total_games):
             paddle.rect.x = screen_width - paddle.rect.width
 
         #Variable de distance avec entre la balle et le pad en valeur absolue
-        #dist = abs((paddle.rect.centerx) - (balle.rect.centerx))
+        dist = abs((paddle.rect.centerx) - (balle.rect.centerx))
         
         #Encourager à rester sous la balle
-        #reward += (-dist / screen_width) * 0.1  # shaping plus léger
+        reward += (-dist / screen_width) * 0.06  # shaping plus léger
 
         #Gérer la collision balle paddle, et faire rebondir la balle
         if pygame.sprite.collide_mask(balle, paddle):
