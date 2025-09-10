@@ -2,6 +2,9 @@
 Breakia is a simple AI experiment designed to play a Breakout-style game built in Python with Pygame.
 This project was my very first attempt at both Python and reinforcement learning, so you’ll find that all variables and comments are still written in French.
 
+For this project, I was inspired by a Pygame tutorial (https://www.101computing.net/breakout-tutorial-using-pygame-getting-started/) to create a Breakout clone, which I then modified myself.
+For the Q-Learning part, I took the idea from a Pygame Snake clone project (https://openclassrooms.com/forum/sujet/jeu-snake-ia-python) and adapted it to my own code.
+
 What libs: 
 - Pygame
 - Random
