@@ -28,3 +28,6 @@ Future Improvements:
 - Clean up and translate the code to English
 - Add visualizations of the training process
 - Experiment with other RL algorithms (e.g., Deep Q-Networks)
+
+Here, I tried to create a graph showing the evolution of my AI over nearly 5000 games. It’s not very clear, but you can see that the AI progresses quite quickly, even though the games are extremely random :
+<img width="1200" height="600" alt="graph_ai_1" src="https://github.com/user-attachments/assets/10c0c417-549a-4f95-811d-5af443845eeb" />
