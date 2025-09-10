@@ -1,6 +1,5 @@
 import pygame
 from random import randint
-NOIR = (0, 0, 0)
 
 class Balle(pygame.sprite.Sprite):
     #Créer une class pour la balle avec la fonction sprite de pygame
@@ -25,4 +24,4 @@ class Balle(pygame.sprite.Sprite):
     
     def rebond(self):
         self.velocity[0] = -self.velocity[0]
-        self.velocity[1] = randint(-8,8)
+        self.velocity[1] = randint(-5,5)
