@@ -10,10 +10,7 @@ from simple_ai import SimpleAI  #Importe la class SimpleAI dans simple_ai.py
 #Définir les couleurs à utiliser
 BLANC = (255,255,255)
 NOIR = (0, 0, 0)
-BLEUFONCE = (36 ,90 ,140)
-BLEU = (0, 190, 242)
 ROUGE = (204, 53, 53)
-VERT = (80, 162, 45)
 VIOLET = (156, 60, 185)
 ORANGE = (255, 150, 31)
 JAUNE = (245, 210, 10)
@@ -22,42 +19,34 @@ JAUNE = (245, 210, 10)
 screen_width = 800
 screen_height = 600
 
-
 #Actions possibles par l'IA
 actions = ['GAUCHE', 'DROITE', 'RIEN']
 
-# Q-learning avec états simplifiés
+#Q-learning avec états simplifiés
 #Discrétiser pour l'IA
-nb_pos_paddle = 10   #10 si c'est pas assez car reduit le nombre d'états possible
-nb_pos_x_balle = 12  #12 pareil
-nb_pos_y_balle = 12  #12 pareil
-nb_vx = 2   # gauche/0/droite
-nb_vy = 2   # haut/0/bas
+nb_pos_paddle = 10   #Diviser le terrain pour réduire le nombre d'états
+nb_pos_x_balle = 12  #Pareil
+nb_pos_y_balle = 12  #Pareil
+nb_vx = 2   #Nombre de déplacements possible X (gauche/0/droite)
+nb_vy = 2   #Nombre de déplacements possible Y (haut/0/bas)
 
-# Q-learning avec états simplifiés
-Q = np.zeros((nb_pos_paddle,
+#Table de Q-learning avec les variables du haut
+if os.path.exists("C:/Users/alexw/Desktop/Code/Python/Projet_BreakAI/scores/Q_table.npy"):
+    Q = np.load("C:/Users/alexw/Desktop/Code/Python/Projet_BreakAI/scores/Q_table.npy")
+    print("Q-table chargée depuis le fichier.")
+else:
+    Q = np.zeros((nb_pos_paddle,
               nb_pos_x_balle,
               nb_pos_y_balle,
               nb_vx, 
               nb_vy,
               len(actions)))
 
-alpha = 0.1
-gamma = 0.95
+#Alpha et Gamma pour 
+alpha = 0.1    #Taux d’apprentissage qui contrôle à quelle vitesse l’IA met à jour ses connaissances
+gamma = 0.95   #Facteur de réduction qui dicte l’importance des prochaines récompenses par rapport aux immédiates
 
-if os.path.exists("C:/Users/alexw/Desktop/Code/Python/Projet_BreakAI/scores/Q_table.npy"):
-    Q = np.load("C:/Users/alexw/Desktop/Code/Python/Projet_BreakAI/scores/Q_table.npy")
-    print("Q-table chargée depuis le fichier.")
-else:
-    Q = np.zeros((nb_pos_paddle,
-                  nb_pos_x_balle,
-                  nb_pos_y_balle,
-                  nb_vx, 
-                  nb_vy,
-                  len(actions)))
-    print("Nouvelle Q-table créée.")
-
-#Reduire la taille de l'écran pour moins de possibilités
+#Reduire la taille de l'écran pour moins de possibilités (discrétisation)
 def get_state(balle, paddle, screen_width, screen_height):
     x = int(balle.rect.x / (screen_width / nb_pos_x_balle))
     y = int(balle.rect.y / (screen_height / nb_pos_y_balle))
@@ -69,7 +58,8 @@ def get_state(balle, paddle, screen_width, screen_height):
     x = min(nb_pos_x_balle - 1, x)
     y = min(nb_pos_y_balle - 1, y)
     r = min(nb_pos_paddle - 1, r)
-
+    
+    #Retourner l'état en tuple
     return (r, x, y, vx, vy)
 
 #Choisir une action
@@ -80,7 +70,7 @@ def choose_action(state, epsilon):
         action_index = np.argmax(Q[state + (slice(None),)])
         return actions[action_index]
 
-#Mise à jour Q-learning
+#Mise à jour de la table de Q-learning
 def update_Q(state, action, reward, next_state):
     action_index = actions.index(action)
     old_value = Q[state + (action_index,)]
@@ -93,9 +83,10 @@ def update_Q(state, action, reward, next_state):
 #Fonction principale
 def run_game(total_games):
 
+    #Variables utiles du jeu
     vies = 3
     score = 0
-    game_speed = 10000000  # vitesse par défaut
+    game_speed = 10000000
     perdreVies = False
     
     enCours  = True
@@ -212,6 +203,7 @@ def run_game(total_games):
             else:
                 return score  # Partie terminée quand plus de vies
 
+        #Si plus de briques on gagne 10 pts et on recommence une partie
         if len(mur_briques) == 0:
                 reward += 10.0
                 return score
@@ -224,17 +216,16 @@ def run_game(total_games):
             balle.rect.y -= balle.velocity[1]
             balle.rebond()
             score += 1  #Augmenter le score quand une brique est touchée
-            brique.kill()
+            brique.kill() #Disparition brique
 
-        #Evite que la balle reste coincée
+        #Evite que la balle reste coincée (un peu hasardeux mais ça marche)
         if balle.velocity[1] == 0:
             balle.velocity[1] = random.choice([-1, 1])
         if balle.velocity[0] == 0:
             balle.velocity[0] = random.choice([-1, 1])
 
 
-        #Code d'affichage des éléments
-        #Mettre une couleur à l'écran
+        #Mettre une couleur à l'écran et tracer ligne pour score et vies
         ecran.fill(NOIR)
         pygame.draw.line(ecran, BLANC, [0, 40], [800, 40], 2)
 
@@ -254,11 +245,11 @@ def run_game(total_games):
 
         # État courant
         state = get_state(balle, paddle, screen_width, screen_height)
-        # epsilon décroissant pour plus d’exploitation
+        #Epsilon décroissant pour plus d’exploration puis exploitation
         epsilon = max(0.05, 0.995 ** total_games)
         action = choose_action(state, epsilon)
 
-
+        #Initialisation des actions (jsp si ça sert vrmt)
         if action == 'DROITE':
             direction = 'DROITE'
         elif action == 'RIEN':
@@ -312,6 +303,7 @@ def run_game(total_games):
 
 
 def main():
+    #Fonction main pour relancer des parties en vidant la pile avec run_game, sinon au bout de 1000 parties ça stoppe
     total_games = 0
     while True:
         score = run_game(total_games)
@@ -322,12 +314,12 @@ def main():
             f.write(f"{total_games},{score}\n")
         total_games += 1    #+1 le nombre de parties totales
 
-        if total_games % 50 == 0:  # toutes les 100 parties
+        if total_games % 50 == 0:  #Sauvegarde Q-table toutes les 50 parties
             np.save("C:/Users/alexw/Desktop/Code/Python/Projet_BreakAI/scores/Q_table.npy", Q)
             print("Q-table sauvegardée !")
 
-    pygame.quit()
+    pygame.quit()   #Ferme pygame proprement
 
 #Lancer le jeu seulement si le fichier est exécuté directement
 if __name__ == "__main__":
-    main()
+    main()  #Appelle la fonction main
